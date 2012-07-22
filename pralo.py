@@ -1,5 +1,4 @@
-#/usr/bin/env python
-#-*- coding:utf-*-
+#! /usr/bin/env python
 # 
 
 # ------------------------------
@@ -13,6 +12,9 @@
 # ------------------------------
 # Imports
 # ------------------------------ 
+import csv
+import os
+import optparse
 
 # ------------------------------
 # Classes
@@ -21,9 +23,18 @@
 # ------------------------------
 # Fonctions
 # ------------------------------ 
-def extrait_from_file(file):
+def extrait_from_file(file_name):
     """Extrait les informations à partir d'un fichier"""
-    pass
+    file = open(file_name, "r")
+    try:
+        reader = csv.reader(file, delimiter = ",")
+        compte =  list(reader)
+        for i in compte[1:]:
+            i[1] = int(i[1])
+        return compte
+    finally:
+        file.close()
+
 
 def echange(l):
     """Algo recursif pour gérer les échanges"""
@@ -65,14 +76,18 @@ def normalise(compte):
     """Centre en 0 les comptes"""
     moyenne = sum([c[1] for c in compte]) / len(compte)
     compte_normalise = compte
+
     for (i,n) in enumerate(compte):
         compte_normalise[i][1] = compte[i][1] - moyenne
+
     return compte_normalise
+
 
 def affiche_final(donRec):
     """Affiche qui donne quoi à qui à partir de la liste"""
     for g in donRec:
         print("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = g[2]))
+
 
 def elimine_seuil(liste, seuil):
     """Elimine les éléments de la liste qui sont sous le seuil """
@@ -84,14 +99,20 @@ def elimine_seuil(liste, seuil):
 # ------------------------------
 
 if __name__ == '__main__':
-    
-    # État des comptes
-    compte = [['bob', 123] , ['pipo', 145] , ['hiphop', 43] , ['dede', 89] , ['chic', 0]]
-    compte_normalise = normalise(compte)
-    # print(compte_normalise)
+    # Pour analyser les options qu'on lui demande 
+    parser = optparse.OptionParser()
+    # options proposée
+    parser.add_option("-f","--file",action="store", type = "string", dest="file_name", help="Analyse les comptes à partir du fichier donné en argument")
+    # Digestion
+    (options, args) = parser.parse_args()
 
-    final = echange(compte_normalise)
-    affiche_final(final)
+    if options.file_name:
+        compte = extrait_from_file(options.file_name)[1:]
+        print(compte)
+        compte_normalise = normalise(compte)
+        final = echange(compte_normalise)
+        affiche_final(final)
+
 # ------------------------------
 # Fin du programme
 # ------------------------------
