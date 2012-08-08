@@ -108,7 +108,6 @@ if __name__ == '__main__':
 
     if options.file_name:
         compte = extrait_from_file(options.file_name)[1:]
-        print(compte)
         compte_normalise = normalise(compte)
         final = echange(compte_normalise)
         affiche_final(final)
