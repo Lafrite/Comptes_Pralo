@@ -31,6 +31,7 @@ def extrait_from_file(file_name):
         compte =  list(reader)
         for i in compte[1:]:
             i[1] = int(i[1])
+            i[2] = int(i[2])
         return compte
     finally:
         file.close()
@@ -71,6 +72,23 @@ def echange(l):
     else:
         return [res]
 
+def forfait(compte):
+    """Gère le nombre resté à Pralo"""
+    cout_total = sum([c[1] for c in compte])
+    print("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
+
+    nbr_jour = sum([c[2] for c in compte])
+    print("Le nombre de jour passé {njour}".format(njour = nbr_jour))
+
+    cout_jour =  cout_total / nbr_jour
+    print("Cout au jour: {cout}".format(cout = cout_jour))
+
+    print("\n")
+
+    new_compte = []
+    for pers in compte:
+        new_compte += [[pers[0], (pers[1] - pers[2] * cout_jour)]]
+    return new_compte
 
 def normalise(compte):
     """Centre en 0 les comptes"""
@@ -108,7 +126,8 @@ if __name__ == '__main__':
 
     if options.file_name:
         compte = extrait_from_file(options.file_name)[1:]
-        compte_normalise = normalise(compte)
+        # compte_normalise = normalise(compte)
+        compte_normalise = forfait(compte)
         final = echange(compte_normalise)
         affiche_final(final)
 

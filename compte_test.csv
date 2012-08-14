@@ -1,5 +1,5 @@
-nom,montant
-pipo,   23
-hiphop, 40
-chic,   0
-Couette,50
+nom,montant, jours
+pipo,   23, 3
+hiphop, 40, 4
+chic,   0, 4
+Couette,50, 1
