@@ -24,12 +24,17 @@ import optparse
 # Fonctions
 # ------------------------------ 
 def extrait_from_file(file_name):
-    """Extrait les informations à partir d'un fichier"""
+    """
+    Extrait les informations à partir d'un fichier
+    
+    :param file_name: nom du fichier avec les comptes 
+    :return: liste [[nom,montant,jours],...]
+    """
     file = open(file_name, "r")
     try:
         reader = csv.reader(file, delimiter = ",")
         compte =  list(reader)
-        for i in compte[1:]:
+        for i in compte[1:]: # On parcourt les lignes
             i[1] = int(i[1])
             i[2] = int(i[2])
         return compte
@@ -38,7 +43,12 @@ def extrait_from_file(file_name):
 
 
 def echange(l):
-    """Algo recursif pour gérer les échanges"""
+    """
+    Algo recursif pour gérer les échanges
+    
+    :param l: liste des valeurs associées aux débits des comptes
+    :return: liste des valeurs associées aux débits des comptes après le remboursement
+    """
     l.sort(key = lambda s: s[1])
     m = l[0]
     M = l[-1]
@@ -73,7 +83,12 @@ def echange(l):
         return [res]
 
 def forfait(compte):
-    """Gère le nombre resté à Pralo"""
+    """
+    Gère le nombre resté à Pralo
+    
+    :param compte: comptes de ce que chacun a payé [[nom, montant,jours],...]
+    :return: Comptes des crédits de chacun envers la communauté
+    """
     cout_total = sum([c[1] for c in compte])
     print("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
 
@@ -102,7 +117,11 @@ def normalise(compte):
 
 
 def affiche_final(donRec):
-    """Affiche qui donne quoi à qui à partir de la liste"""
+    """
+    Affiche qui donne quoi à qui à partir de la liste
+    
+    :param donRec: liste avec qui doit quoi à qui [[qui, àqui, quoi]...]
+    """
     for g in donRec:
         print("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = g[2]))
 
