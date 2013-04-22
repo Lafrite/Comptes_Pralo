@@ -42,11 +42,12 @@ def extrait_from_file(file_name):
         file.close()
 
 
-def echange(l):
+def echange(l, seuil = 0):
     """
     Algo recursif pour gérer les échanges
     
     :param l: liste des valeurs associées aux débits des comptes
+    :param seuil: seuil à partir duquel on ne doit plus rien.
     :return: liste des valeurs associées aux débits des comptes après le remboursement
     """
     l.sort(key = lambda s: s[1])
@@ -75,10 +76,13 @@ def echange(l):
          l.remove(M)
          # On change la valeur du min
          l[0] = [m[0], m2]
+
+    # Gestion du Seuil
+    l = [i for i in l if abs(i[1]) >= seuil]
  
     if (len(l) > 1):
         #print(l)
-        return [res] + echange(l)
+        return [res] + echange(l,seuil=seuil)
     else:
         return [res]
 
@@ -96,7 +100,7 @@ def forfait(compte):
     print("Le nombre de jour passé {njour}".format(njour = nbr_jour))
 
     cout_jour =  cout_total / nbr_jour
-    print("Cout au jour: {cout}".format(cout = cout_jour))
+    print("Cout au jour: {cout}".format(cout = round(cout_jour,2)))
 
     print("\n")
 
@@ -123,12 +127,7 @@ def affiche_final(donRec):
     :param donRec: liste avec qui doit quoi à qui [[qui, àqui, quoi]...]
     """
     for g in donRec:
-        print("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = g[2]))
-
-
-def elimine_seuil(liste, seuil):
-    """Elimine les éléments de la liste qui sont sous le seuil """
-    pass
+        print("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = round(g[2],2)))
 
 
 # ------------------------------
@@ -140,6 +139,7 @@ if __name__ == '__main__':
     parser = optparse.OptionParser()
     # options proposée
     parser.add_option("-f","--file",action="store", type = "string", dest="file_name", help="Analyse les comptes à partir du fichier donné en argument")
+    parser.add_option("-e","--seuil",action="store", type = "int", dest="seuil",default=0, help="Seuil à partir duquel on concidère qu'il n'est plus nécessaire de payer.")
     # Digestion
     (options, args) = parser.parse_args()
 
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         compte = extrait_from_file(options.file_name)[1:]
         # compte_normalise = normalise(compte)
         compte_normalise = forfait(compte)
-        final = echange(compte_normalise)
+        final = echange(compte_normalise, options.seuil)
         affiche_final(final)
 
 # ------------------------------
