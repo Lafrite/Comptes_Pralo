@@ -33,11 +33,24 @@ def extrait_from_file(file_name):
     file = open(file_name, "r")
     try:
         reader = csv.reader(file, delimiter = ",")
-        compte =  list(reader)
-        for i in compte[1:]: # On parcourt les lignes
-            i[1] = int(i[1])
-            i[2] = int(i[2])
-        return compte
+        r_comptes =  list(reader)
+        header = r_comptes.pop(0) # On récupère le premier élément (les headers)
+
+        comptes = []
+
+        for c in r_comptes: # On parcourt les lignes pour typer les éléments correctement
+            compte = {}
+            for (i,h) in enumerate(header):
+                if "nom" in h.lower():
+                    compte["nom"] = c[i]
+                if "montant" in h.lower():
+                    compte["montant"] = eval(c[i])
+                if "jour" in h.lower():
+                    compte["jours"] = int(c[i])
+            comptes += [compte]
+
+        print(comptes)
+        return comptes
     finally:
         file.close()
 
@@ -89,10 +102,10 @@ def forfait(compte):
     :param compte: comptes de ce que chacun a payé [[nom, montant,jours],...]
     :return: Comptes des crédits de chacun envers la communauté
     """
-    cout_total = sum([c[1] for c in compte])
+    cout_total = sum([c["montant"] for c in compte])
     print("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
 
-    nbr_jour = sum([c[2] for c in compte])
+    nbr_jour = sum([c["jours"] for c in compte])
     print("Le nombre de jour passé {njour}".format(njour = nbr_jour))
 
     cout_jour =  cout_total / nbr_jour
@@ -102,16 +115,16 @@ def forfait(compte):
 
     new_compte = []
     for pers in compte:
-        new_compte += [[pers[0], (pers[1] - pers[2] * cout_jour)]]
+        new_compte += [[pers["nom"], (pers["montant"] - pers["jours"] * cout_jour)]]
     return new_compte
 
 def normalise(compte):
     """Centre en 0 les comptes"""
-    moyenne = sum([c[1] for c in compte]) / len(compte)
+    moyenne = sum([c["montant"] for c in compte]) / len(compte)
     compte_normalise = compte
 
     for (i,n) in enumerate(compte):
-        compte_normalise[i][1] = compte[i][1] - moyenne
+        compte_normalise[i]["montant"] = compte[i]["montant"] - moyenne
 
     return compte_normalise
 
