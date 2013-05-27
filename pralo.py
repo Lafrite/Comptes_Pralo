@@ -30,8 +30,8 @@ def extrait_from_file(file_name):
         reader = csv.reader(file, delimiter = ",")
         compte =  list(reader)
         for i in compte[1:]:
-            i[1] = int(i[1])
-            i[2] = int(i[2])
+            i[1] = float(i[1])
+            i[2] = float(i[2])
         return compte
     finally:
         file.close()
