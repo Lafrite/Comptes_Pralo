@@ -16,6 +16,8 @@ import csv
 import os
 import optparse
 
+from account import Account
+
 # ------------------------------
 # Classes
 # ------------------------------ 
@@ -54,49 +56,6 @@ def extrait_from_file(file_name):
         file.close()
 
 
-def echange(l, seuil = 0):
-    """
-    Algo recursif pour gérer les échanges
-    
-    :param l: liste des valeurs associées aux débits des comptes
-    :param seuil: seuil à partir duquel on ne doit plus rien.
-    :return: liste des valeurs associées aux débits des comptes après le remboursement
-    """
-    l.sort(key = lambda s: s[1])
-    m = l[0]
-    M = l[-1]
-
-    res = ['doneur','receveur',0]
- 
-    # Si celui qui doit le plus doit moins que le crédit que celui qui a le plus grand crédit
-    # Il va donc tout lui donner
-    if  abs(m[1]) <= abs(M[1]):
-        M2 = M[1] + m[1]
-        # print("{em} donne {em_n} à {eM} donc {em} devient {eM2}".format(em = m[0], em_n = abs(m[1]), eM = M[0] , eM2 = M2)) 
-        res = [m[0], M[0], abs(m[1])]
-        # On enleve le minimum
-        l.remove(m)
-        # ON change la valeur du max
-        l[-1] = [M[0],M2]
-       
-    # Sinon il donne juste de quoi compenser
-    else:
-         m2 = m[1] + M[1]
-         # print("{em} donne {eM_n} à {eM} et devient {em2}".format(em = m[0] , em2 = m2 , eM = M[0], eM_n = M[1]))
-         res = [m[0], M[0], abs(M[1])]
-         # On eleve le max
-         l.remove(M)
-         # On change la valeur du min
-         l[0] = [m[0], m2]
-
-    # Gestion du Seuil
-    l = [i for i in l if abs(i[1]) >= seuil]
- 
-    if (len(l) > 1):
-        #print(l)
-        return [res] + echange(l,seuil=seuil)
-    else:
-        return [res]
 
 def forfait(compte):
     """
@@ -160,7 +119,9 @@ if __name__ == '__main__':
         compte = extrait_from_file(options.file_name)
         # compte_normalise = normalise(compte)
         compte_normalise = forfait(compte)
-        final = echange(compte_normalise, options.seuil)
+        #final = echange(compte_normalise, options.seuil)
+        account = Account(compte_normalise)
+        final = account.tribut(options.seuil)
         affiche_final(final)
 
 # ------------------------------
