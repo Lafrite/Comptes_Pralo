@@ -49,7 +49,6 @@ def extrait_from_file(file_name):
                     compte["jours"] = int(c[i])
             comptes += [compte]
 
-        print(comptes)
         return comptes
     finally:
         file.close()
@@ -120,6 +119,7 @@ def forfait(compte):
     new_compte = []
     for pers in compte:
         new_compte += [[pers["nom"], (pers["montant"] - pers["jours"] * cout_jour)]]
+        
     return new_compte
 
 def normalise(compte):
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     if options.file_name:
-        compte = extrait_from_file(options.file_name)[1:]
+        compte = extrait_from_file(options.file_name)
         # compte_normalise = normalise(compte)
         compte_normalise = forfait(compte)
         final = echange(compte_normalise, options.seuil)
