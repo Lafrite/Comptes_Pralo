@@ -57,23 +57,23 @@ def extrait_from_file(file_name):
 
 
 
-def forfait(compte):
+def forfait(compte, output = print):
     """
-    Gère le nombre resté à Pralo
+    Gère le nombre de jours resté à Pralo et affiche quelques stats
     
     :param compte: comptes de ce que chacun a payé [[nom, montant,jours],...]
     :return: Comptes des crédits de chacun envers la communauté
     """
     cout_total = sum([c["montant"] for c in compte])
-    print("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
+    output("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
 
     nbr_jour = sum([c["jours"] for c in compte])
-    print("Le nombre de jour passé {njour}".format(njour = nbr_jour))
+    output("Le nombre de jour passé {njour}".format(njour = nbr_jour))
 
     cout_jour =  cout_total / nbr_jour
-    print("Cout au jour: {cout}".format(cout = round(cout_jour,2)))
+    output("Cout au jour: {cout}".format(cout = round(cout_jour,2)))
 
-    print("\n")
+    output("\n")
 
     new_compte = []
     for pers in compte:
@@ -92,14 +92,14 @@ def normalise(compte):
     return compte_normalise
 
 
-def affiche_final(donRec):
+def affiche_final(donRec, output = print):
     """
     Affiche qui donne quoi à qui à partir de la liste
     
     :param donRec: liste avec qui doit quoi à qui [[qui, àqui, quoi]...]
     """
     for g in donRec:
-        print("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = round(g[2],2)))
+        output("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = round(g[2],2)))
 
 
 # ------------------------------
