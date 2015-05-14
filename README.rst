@@ -16,6 +16,7 @@ On écrit ce que chacun à payé au long du séjour et on renseigne le temps de 
     Couette,50, 1
 
 Puis on fait tourner le programme sur le fichier::
+
     pralo.py -f compte_test.csv
 
     Cout total de Pralo: 113
