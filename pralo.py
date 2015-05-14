@@ -16,6 +16,8 @@ import csv
 import os
 import optparse
 
+from account import Account
+
 # ------------------------------
 # Classes
 # ------------------------------ 
@@ -24,92 +26,80 @@ import optparse
 # Fonctions
 # ------------------------------ 
 def extrait_from_file(file_name):
-    """Extrait les informations à partir d'un fichier"""
+    """
+    Extrait les informations à partir d'un fichier
+    
+    :param file_name: nom du fichier avec les comptes 
+    :return: liste [[nom,montant,jours],...]
+    """
     file = open(file_name, "r")
     try:
         reader = csv.reader(file, delimiter = ",")
-        compte =  list(reader)
-        for i in compte[1:]:
-            i[1] = float(i[1])
-            i[2] = float(i[2])
-        return compte
+        r_comptes =  list(reader)
+        header = r_comptes.pop(0) # On récupère le premier élément (les headers)
+
+        comptes = []
+
+        for c in r_comptes: # On parcourt les lignes pour typer les éléments correctement
+            compte = {}
+            for (i,h) in enumerate(header):
+                if "nom" in h.lower():
+                    compte["nom"] = c[i]
+                if "montant" in h.lower():
+                    compte["montant"] = eval(c[i])
+                if "jour" in h.lower():
+                    compte["jours"] = int(c[i])
+            comptes += [compte]
+
+        return comptes
     finally:
         file.close()
 
 
-def echange(l):
-    """Algo recursif pour gérer les échanges"""
-    l.sort(key = lambda s: s[1])
-    m = l[0]
-    M = l[-1]
 
-    res = ['doneur','receveur',0]
- 
-    # Si celui qui doit le plus doit moins que le crédit que celui qui a le plus grand crédit
-    # Il va donc tout lui donner
-    if  abs(m[1]) <= abs(M[1]):
-        M2 = M[1] + m[1]
-        # print("{em} donne {em_n} à {eM} donc {em} devient {eM2}".format(em = m[0], em_n = abs(m[1]), eM = M[0] , eM2 = M2)) 
-        res = [m[0], M[0], abs(m[1])]
-        # On enleve le minimum
-        l.remove(m)
-        # ON change la valeur du max
-        l[-1] = [M[0],M2]
-       
-    # Sinon il donne juste de quoi compenser
-    else:
-         m2 = m[1] + M[1]
-         # print("{em} donne {eM_n} à {eM} et devient {em2}".format(em = m[0] , em2 = m2 , eM = M[0], eM_n = M[1]))
-         res = [m[0], M[0], abs(M[1])]
-         # On eleve le max
-         l.remove(M)
-         # On change la valeur du min
-         l[0] = [m[0], m2]
- 
-    if (len(l) > 1):
-        #print(l)
-        return [res] + echange(l)
-    else:
-        return [res]
+def forfait(compte, output = print):
+    """
+    Gère le nombre de jours resté à Pralo et affiche quelques stats
+    
+    :param compte: comptes de ce que chacun a payé [[nom, montant,jours],...]
+    :return: Comptes des crédits de chacun envers la communauté
+    """
+    cout_total = sum([c["montant"] for c in compte])
+    output("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
 
-def forfait(compte):
-    """Gère le nombre resté à Pralo"""
-    cout_total = sum([c[1] for c in compte])
-    print("Cout total de Pralo: {cout_tot}".format(cout_tot = cout_total))
-
-    nbr_jour = sum([c[2] for c in compte])
-    print("Le nombre de jour passé {njour}".format(njour = nbr_jour))
+    nbr_jour = sum([c["jours"] for c in compte])
+    output("Le nombre de jour passé {njour}".format(njour = nbr_jour))
 
     cout_jour =  cout_total / nbr_jour
-    print("Cout au jour: {cout}".format(cout = cout_jour))
+    output("Cout au jour: {cout}".format(cout = round(cout_jour,2)))
 
-    print("\n")
+    output("\n")
 
     new_compte = []
     for pers in compte:
-        new_compte += [[pers[0], (pers[1] - pers[2] * cout_jour)]]
+        new_compte += [[pers["nom"], (pers["montant"] - pers["jours"] * cout_jour)]]
+        
     return new_compte
 
 def normalise(compte):
     """Centre en 0 les comptes"""
-    moyenne = sum([c[1] for c in compte]) / len(compte)
+    moyenne = sum([c["montant"] for c in compte]) / len(compte)
     compte_normalise = compte
 
     for (i,n) in enumerate(compte):
-        compte_normalise[i][1] = compte[i][1] - moyenne
+        compte_normalise[i]["montant"] = compte[i]["montant"] - moyenne
 
     return compte_normalise
 
 
-def affiche_final(donRec):
-    """Affiche qui donne quoi à qui à partir de la liste"""
+def affiche_final(donRec, output = print):
+    """
+    Affiche qui donne quoi à qui à partir de la liste
+    
+    :param donRec: liste avec qui doit quoi à qui [[qui, àqui, quoi]...]
+    """
     for g in donRec:
-        print("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = g[2]))
-
-
-def elimine_seuil(liste, seuil):
-    """Elimine les éléments de la liste qui sont sous le seuil """
-    pass
+        output("{don} donne {montant} à {rec}".format(don = g[0], rec = g[1], montant = round(g[2],2)))
 
 
 # ------------------------------
@@ -121,14 +111,17 @@ if __name__ == '__main__':
     parser = optparse.OptionParser()
     # options proposée
     parser.add_option("-f","--file",action="store", type = "string", dest="file_name", help="Analyse les comptes à partir du fichier donné en argument")
+    parser.add_option("-e","--seuil",action="store", type = "int", dest="seuil",default=0, help="Seuil à partir duquel on concidère qu'il n'est plus nécessaire de payer.")
     # Digestion
     (options, args) = parser.parse_args()
 
     if options.file_name:
-        compte = extrait_from_file(options.file_name)[1:]
+        compte = extrait_from_file(options.file_name)
         # compte_normalise = normalise(compte)
         compte_normalise = forfait(compte)
-        final = echange(compte_normalise)
+        #final = echange(compte_normalise, options.seuil)
+        account = Account(compte_normalise)
+        final = account.tribut(options.seuil)
         affiche_final(final)
 
 # ------------------------------
